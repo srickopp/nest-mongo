@@ -15,16 +15,22 @@ export default class AuthService {
   ) {}
 
   async validateToken(token) {
-    const session = await this.sessionModel.findOne({
-      token: token,
-      isActive: true,
-    });
+    const session = await this.sessionModel
+      .findOne({
+        token: token,
+        isActive: true,
+      })
+      .populate('user');
 
     if (!session) {
       return {
         success: false,
         message: 'INVALID_TOKEN',
       };
+    }
+
+    if (session.user) {
+      session.user.password = undefined;
     }
 
     return {
@@ -62,7 +68,7 @@ export default class AuthService {
     }
 
     // Create Session
-    const session = await this.createSession(user._id);
+    const session = await this.createSession(user);
     delete user.password;
 
     return {
@@ -129,13 +135,24 @@ export default class AuthService {
     };
   }
 
-  private async createSession(userId: string): Promise<Session> {
+  private async createSession(user: User): Promise<Session> {
     const token = uuidv4();
     const session = await this.sessionModel.create({
       token,
-      userId: userId,
+      user,
       isActive: true,
     });
+
+    await this.userModel.updateOne(
+      {
+        _id: user._id,
+      },
+      {
+        $push: {
+          sessions: session._id,
+        },
+      },
+    );
 
     return session;
   }

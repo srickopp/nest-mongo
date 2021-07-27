@@ -1,6 +1,7 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { BearerHttpGuard } from 'src/guard/http.guard';
 import AuthService from './auth.service';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 
@@ -24,6 +25,17 @@ export class AuthController {
     return res.status(register.status).send({
       message: register.message,
       data: register.data,
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(BearerHttpGuard)
+  @Get('/profile')
+  async validateToken(@Res() res: Response) {
+    return res.status(200).send({
+      data: {
+        session: res.locals.session,
+      },
     });
   }
 }
