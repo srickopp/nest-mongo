@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import {
   Challenge,
   ChallengeDocument,
@@ -22,6 +22,7 @@ export default class ChallengeService {
     private studentChallengeModel: Model<StudentChallengeDocument>,
   ) {}
 
+  // Manage Challenge
   async createChallenge(data: CreateChallenge): Promise<Challenge> {
     // Validate Challenge
     const isDuplicateChallenge = await this.challengeModel.countDocuments({
@@ -97,6 +98,83 @@ export default class ChallengeService {
       deletedAt: new Date(),
     });
     return true;
+  }
+
+  // Assign Challenge
+  async assignChallenge(
+    challengeId: any,
+    teacher: User,
+    studentId: any,
+  ): Promise<StudentChallenge> {
+    await this.findOneOrFail(challengeId);
+    // Validate challenge is already assign to the student?
+    const isAlreadyAssigned = await this.studentChallengeModel.findOne({
+      challenge: challengeId,
+      student: studentId,
+    });
+
+    if (isAlreadyAssigned) {
+      throw new HttpException(
+        {
+          message: 'Student already assigned to this challenge',
+        },
+        400,
+      );
+    }
+
+    const studentChallenge = await this.studentChallengeModel.create({
+      challenge: challengeId,
+      student: studentId,
+      reviewer: teacher._id,
+      solution: '',
+    });
+
+    // Push to challenge doc
+    await this.challengeModel.updateOne(
+      {
+        _id: challengeId,
+      },
+      {
+        $push: {
+          studentChallenges: studentChallenge._id,
+        },
+      },
+    );
+
+    // Push to teacher doc
+    await this.userModel.updateOne(
+      {
+        _id: teacher._id,
+      },
+      {
+        $push: {
+          reviewChallenge: studentChallenge._id,
+        },
+      },
+    );
+
+    // Push to student doc
+    await this.userModel.updateOne(
+      {
+        _id: studentId,
+      },
+      {
+        $push: {
+          studentChallenge: studentChallenge._id,
+        },
+      },
+    );
+
+    return studentChallenge;
+  }
+
+  async getReviewChallenge(teacherId): Promise<StudentChallenge[]> {
+    return await this.studentChallengeModel
+      .find({
+        reviewer: teacherId,
+      })
+      .populate('challenge', { description: 1 })
+      .populate('student', { name: 1 });
   }
 
   private async findOneOrFail(id: string): Promise<Challenge> {

@@ -14,8 +14,9 @@ import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { BearerHttpGuard } from 'src/guard/http.guard';
 import { TeacherGuard } from 'src/guard/teacher.guard';
+import { User } from 'src/models/schemas/user.schema';
 import ChallengeService from './challenge.service';
-import { CreateChallenge } from './dto/challenge.dto';
+import { AssignChallenge, CreateChallenge } from './dto/challenge.dto';
 
 @Controller('challenge')
 export default class ChallengeController {
@@ -63,6 +64,40 @@ export default class ChallengeController {
       message: deleteChallenge
         ? 'Success delete challenge'
         : 'Failed delete challenge',
+    });
+  }
+
+  @ApiTags('Challenge-Teacher')
+  @ApiBearerAuth()
+  @UseGuards(TeacherGuard)
+  @Post('/assign-challenge')
+  async assignChallenge(@Body() body: AssignChallenge, @Res() res: Response) {
+    const userInfo: User = res.locals.session.user;
+    const assignChallenge = await this.challengeService.assignChallenge(
+      body.challengeId,
+      userInfo,
+      body.studentId,
+    );
+
+    return res.status(201).send({
+      message: 'Success assign challenge',
+      data: assignChallenge,
+    });
+  }
+
+  @ApiTags('Challenge-Teacher')
+  @ApiBearerAuth()
+  @UseGuards(TeacherGuard)
+  @Get('/review-challenge')
+  async getReviewChallege(@Res() res: Response) {
+    const userInfo: User = res.locals.session.user;
+    const reviewChallenges = await this.challengeService.getReviewChallenge(
+      userInfo._id,
+    );
+
+    return res.status(201).send({
+      message: 'Success assign challenge',
+      data: reviewChallenges,
     });
   }
 

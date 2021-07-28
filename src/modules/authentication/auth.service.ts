@@ -2,16 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
-import { Session, SessionDocument } from 'src/models/schemas/session.schema';
-import { User, UserDocument } from 'src/models/schemas/user.schema';
+import { Session } from 'src/models/schemas/session.schema';
+import { User } from 'src/models/schemas/user.schema';
 import { v4 as uuidv4 } from 'uuid';
 import { LoginDto, RegisterDto } from './dto/auth.dto';
 
 @Injectable()
 export default class AuthService {
   public constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(Session.name) private sessionModel: Model<SessionDocument>,
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Session.name) private sessionModel: Model<Session>,
   ) {}
 
   async validateToken(token) {
