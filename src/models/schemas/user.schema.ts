@@ -6,8 +6,9 @@ import { Session } from './session.schema';
 
 export type UserDocument = User & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
+  @Prop({ type: mongoose.Schema.Types.ObjectId })
   _id: string;
 
   @Prop({ required: true })

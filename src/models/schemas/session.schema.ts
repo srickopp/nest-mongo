@@ -1,12 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import * as mongoose from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { User } from './user.schema';
 
 export type SessionDocument = Session & Document;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Session {
+  @Prop({ type: Types.ObjectId })
+  _id: string;
+
   @Prop({ required: true })
   token: string;
 
@@ -18,7 +20,7 @@ export class Session {
   @Prop()
   password: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
+  @Prop({ type: Types.ObjectId, ref: User.name })
   user: User;
 }
 
