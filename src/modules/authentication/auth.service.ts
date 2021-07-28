@@ -119,7 +119,7 @@ export default class AuthService {
     success: boolean;
     message?: string;
   }> {
-    const isEmailExist = await this.userModel.count({
+    const isEmailExist = await this.userModel.countDocuments({
       email: data.email,
     });
 

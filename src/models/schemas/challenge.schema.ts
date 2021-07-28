@@ -2,11 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { StudentChallenge } from './studentChallenge.schema';
 
-export type UserDocument = Challenge & Document;
+export type ChallengeDocument = Challenge & Document;
 
 @Schema({ timestamps: true })
 export class Challenge {
-  @Prop({ type: Types.ObjectId })
   _id: string;
 
   @Prop({ required: true })
@@ -16,4 +15,4 @@ export class Challenge {
   studentChallenges: StudentChallenge[];
 }
 
-export const UserSchema = SchemaFactory.createForClass(Challenge);
+export const ChallengeSchema = SchemaFactory.createForClass(Challenge);

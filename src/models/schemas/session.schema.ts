@@ -6,7 +6,6 @@ export type SessionDocument = Session & Document;
 
 @Schema({ timestamps: true })
 export class Session {
-  @Prop({ type: Types.ObjectId })
   _id: string;
 
   @Prop({ required: true })

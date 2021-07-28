@@ -3,11 +3,10 @@ import { Document, Types } from 'mongoose';
 import { Challenge } from './challenge.schema';
 import { User } from './user.schema';
 
-export type UserDocument = Challenge & Document;
+export type StudentChallengeDocument = StudentChallenge & Document;
 
 @Schema({ timestamps: true })
 export class StudentChallenge {
-  @Prop({ type: Types.ObjectId })
   _id: string;
 
   @Prop({ type: Types.ObjectId, ref: Challenge.name })
@@ -35,4 +34,5 @@ export class StudentChallenge {
   isReviewed: boolean;
 }
 
-export const UserSchema = SchemaFactory.createForClass(Challenge);
+export const StudentChallengeSchema =
+  SchemaFactory.createForClass(StudentChallenge);
