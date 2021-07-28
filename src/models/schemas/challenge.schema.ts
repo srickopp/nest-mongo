@@ -13,6 +13,9 @@ export class Challenge {
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'StudentChallenge' }] })
   studentChallenges: StudentChallenge[];
+
+  @Prop()
+  deletedAt: Date;
 }
 
 export const ChallengeSchema = SchemaFactory.createForClass(Challenge);

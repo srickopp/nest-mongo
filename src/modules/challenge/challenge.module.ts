@@ -9,6 +9,8 @@ import {
   StudentChallengeSchema,
 } from 'src/models/schemas/studentChallenge.schema';
 import { User, UserSchema } from 'src/models/schemas/user.schema';
+import ChallengeController from './challenge.controller';
+import ChallengeService from './challenge.service';
 
 @Module({
   imports: [
@@ -18,7 +20,7 @@ import { User, UserSchema } from 'src/models/schemas/user.schema';
       { name: StudentChallenge.name, schema: StudentChallengeSchema },
     ]),
   ],
-  controllers: [],
-  providers: [],
+  controllers: [ChallengeController],
+  providers: [ChallengeService],
 })
 export class ChallengeModule {}

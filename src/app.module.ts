@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './modules/authentication/auth.module';
 import * as dotenv from 'dotenv';
+import { ChallengeModule } from './modules/challenge/challenge.module';
 dotenv.config();
 
 @Module({
@@ -13,6 +14,7 @@ dotenv.config();
       },
     ),
     AuthModule,
+    ChallengeModule,
   ],
   controllers: [],
   providers: [],
