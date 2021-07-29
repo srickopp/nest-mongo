@@ -20,7 +20,10 @@ export default class AuthService {
         token: token,
         isActive: true,
       })
-      .populate('user');
+      .populate('user', {
+        name: 1,
+        role: 1,
+      });
 
     if (!session) {
       return {
@@ -47,9 +50,16 @@ export default class AuthService {
       session: Session;
     };
   }> {
-    const user = await this.userModel.findOne({
-      email: data.email,
-    });
+    const user = await this.userModel.findOne(
+      {
+        email: data.email,
+      },
+      {
+        name: 1,
+        role: 1,
+        password: 1,
+      },
+    );
 
     if (!user) {
       return {
@@ -69,7 +79,7 @@ export default class AuthService {
 
     // Create Session
     const session = await this.createSession(user);
-    delete user.password;
+    user.password = undefined;
 
     return {
       status: 200,
@@ -139,7 +149,7 @@ export default class AuthService {
     const token = uuidv4();
     const session = await this.sessionModel.create({
       token,
-      user,
+      user: user._id,
       isActive: true,
     });
 
