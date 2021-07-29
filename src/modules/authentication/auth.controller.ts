@@ -19,6 +19,12 @@ export class AuthController {
     });
   }
 
+  /**
+   * At register you can register as new user.
+   * the role that available is: "TEACHER" & "STUDENT"
+   * @param body
+   * @param res
+   */
   @Post('/register')
   async register(@Body() body: RegisterDto, @Res() res: Response) {
     const register = await this.authService.register(body);
@@ -28,6 +34,10 @@ export class AuthController {
     });
   }
 
+  /**
+   * This endpoint will return logged in user informations
+   * @param res
+   */
   @ApiBearerAuth()
   @UseGuards(BearerHttpGuard)
   @Get('/profile')
