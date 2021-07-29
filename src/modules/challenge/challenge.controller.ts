@@ -21,6 +21,7 @@ import ChallengeService from './challenge.service';
 import {
   AssignChallenge,
   CreateChallenge,
+  ReviewChallenge,
   SolveChallenge,
 } from './dto/challenge.dto';
 
@@ -104,6 +105,23 @@ export default class ChallengeController {
     return res.status(201).send({
       message: 'Success get challenge',
       data: reviewChallenges,
+    });
+  }
+
+  @ApiTags('Challenge-Student')
+  @ApiBearerAuth()
+  @UseGuards(TeacherGuard)
+  @Post('/review-challenge')
+  async review(@Body() body: ReviewChallenge, @Res() res: Response) {
+    const userInfo: User = res.locals.session.user;
+    const reviewChallenge = await this.challengeService.reviewChallenge(
+      userInfo._id,
+      body,
+    );
+
+    return res.status(201).send({
+      message: 'Success solve challenge',
+      data: reviewChallenge,
     });
   }
 

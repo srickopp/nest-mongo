@@ -10,7 +10,11 @@ import {
   StudentChallengeDocument,
 } from 'src/models/schemas/studentChallenge.schema';
 import { User, UserDocument } from 'src/models/schemas/user.schema';
-import { CreateChallenge, SolveChallenge } from './dto/challenge.dto';
+import {
+  CreateChallenge,
+  ReviewChallenge,
+  SolveChallenge,
+} from './dto/challenge.dto';
 
 @Injectable()
 export default class ChallengeService {
@@ -220,24 +224,77 @@ export default class ChallengeService {
       );
     }
 
-    const solvedChallenge = await this.studentChallengeModel
-      .findOneAndUpdate(
+    await this.studentChallengeModel.updateOne(
+      {
+        _id: data.studentchallengeId,
+      },
+      {
+        solution: data.solutions,
+        isDone: true,
+      },
+    );
+
+    return await this.studentChallengeModel
+      .findOne(
         {
           _id: data.studentchallengeId,
         },
         {
-          solution: data.solutions,
-          isDone: true,
-        },
-        {
-          fields: {
-            solution: 1,
-          },
+          solution: 1,
+          isDone: 1,
         },
       )
       .populate('challenge', { description: 1 });
+  }
 
-    return solvedChallenge;
+  async reviewChallenge(
+    teacherId,
+    data: ReviewChallenge,
+  ): Promise<StudentChallenge> {
+    // review challenge
+    const isChallengeReadyToReview = await this.studentChallengeModel.findOne({
+      _id: data.studentchallengeId,
+      reviewer: teacherId,
+    });
+
+    if (!isChallengeReadyToReview) {
+      throw new HttpException(
+        {
+          message: 'Challenge not found',
+        },
+        404,
+      );
+    } else if (isChallengeReadyToReview.isDone == false) {
+      throw new HttpException(
+        {
+          message: 'Challenge is not solve yet',
+        },
+        400,
+      );
+    } else if (isChallengeReadyToReview.isReviewed == true) {
+      throw new HttpException(
+        {
+          message: 'Challenge already reviewed',
+        },
+        400,
+      );
+    }
+
+    // Review Challenge
+    await this.studentChallengeModel.updateOne(
+      {
+        _id: data.studentchallengeId,
+      },
+      {
+        comment: data.comment,
+        grade: data.grade,
+        isReviewed: true,
+      },
+    );
+
+    return await this.studentChallengeModel.findOne({
+      _id: data.studentchallengeId,
+    });
   }
 
   private async findOneOrFail(id: string): Promise<Challenge> {

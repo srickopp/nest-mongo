@@ -36,11 +36,11 @@ export class SolveChallenge {
 export class ReviewChallenge {
   @ApiProperty()
   @IsNotEmpty()
-  challengeId: string;
+  studentchallengeId: string;
 
   @ApiProperty()
   @IsNotEmpty()
-  grade: string;
+  grade: number;
 
   @ApiProperty()
   @IsNotEmpty()

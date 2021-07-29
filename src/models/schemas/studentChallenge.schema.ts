@@ -25,7 +25,7 @@ export class StudentChallenge {
   grade: number;
 
   @Prop()
-  comment: number;
+  comment: string;
 
   @Prop({ default: false })
   isDone: boolean;
