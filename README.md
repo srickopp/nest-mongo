@@ -32,6 +32,9 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## API Documentation
+This project use Swagger for API Documentation. You can find at [localhost:3000/documentation](localhost:3000/documentation)
+
 ## Stay in touch
 
 Author - [SamueL Ricko Perdana Putra](https://www.linkedin.com/in/samuelricko/)
