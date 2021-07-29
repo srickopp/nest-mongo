@@ -12,6 +12,9 @@ You can get the data model schema from here: [Data Schema Model](https://lucid.a
 
 ## Installation
 
+Before running the application, make sure that you already setup the enviroment file.
+The example you can se at `.env-example` file.
+
 ```bash
 $ npm install
 ```
