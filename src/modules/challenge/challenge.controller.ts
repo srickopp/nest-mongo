@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { ChallengeStatus } from 'src/enum/challengeStatus.enum';
 import { Role } from 'src/enum/role.enum';
 import { BearerHttpGuard } from 'src/guard/http.guard';
 import { TeacherGuard } from 'src/guard/teacher.guard';
@@ -94,12 +95,21 @@ export default class ChallengeController {
 
   @ApiTags('Challenge-Teacher')
   @ApiBearerAuth()
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ChallengeStatus,
+  })
   @UseGuards(TeacherGuard)
   @Get('/review-challenge')
-  async getReviewChallege(@Res() res: Response) {
+  async getReviewChallenge(
+    @Query('status') status: ChallengeStatus,
+    @Res() res: Response,
+  ) {
     const userInfo: User = res.locals.session.user;
     const reviewChallenges = await this.challengeService.getReviewChallenge(
       userInfo._id,
+      status,
     );
 
     return res.status(201).send({
@@ -108,7 +118,7 @@ export default class ChallengeController {
     });
   }
 
-  @ApiTags('Challenge-Student')
+  @ApiTags('Challenge-Teacher')
   @ApiBearerAuth()
   @UseGuards(TeacherGuard)
   @Post('/review-challenge')
@@ -127,9 +137,17 @@ export default class ChallengeController {
 
   @ApiTags('Challenge-Student')
   @ApiBearerAuth()
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ChallengeStatus,
+  })
   @UseGuards(BearerHttpGuard)
   @Get('/student-challenge')
-  async getStudentChallenge(@Res() res: Response) {
+  async getStudentChallenge(
+    @Query('status') status: ChallengeStatus,
+    @Res() res: Response,
+  ) {
     const userInfo: User = res.locals.session.user;
     if (userInfo.role != Role.Student) {
       throw new HttpException(
@@ -141,6 +159,7 @@ export default class ChallengeController {
     }
     const studentChallenges = await this.challengeService.getStudentChallenge(
       userInfo._id,
+      status,
     );
 
     return res.status(201).send({

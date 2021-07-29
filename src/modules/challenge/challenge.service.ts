@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import { ChallengeStatus } from 'src/enum/challengeStatus.enum';
 import {
   Challenge,
   ChallengeDocument,
@@ -172,29 +173,58 @@ export default class ChallengeService {
     return studentChallenge;
   }
 
-  async getReviewChallenge(teacherId: any): Promise<StudentChallenge[]> {
+  async getReviewChallenge(
+    teacherId: any,
+    status?: ChallengeStatus,
+  ): Promise<StudentChallenge[]> {
+    const findQuery = {};
+    findQuery['reviewer'] = teacherId;
+
+    if (status) {
+      if (status != ChallengeStatus.All) {
+        if (status == ChallengeStatus.Completed) {
+          findQuery['isDone'] = true;
+          findQuery['isReviewed'] = false;
+        } else if (status == ChallengeStatus.UnComplete) {
+          findQuery['isDone'] = false;
+        } else if (status == ChallengeStatus.Reviewed) {
+          findQuery['isReviewed'] = true;
+        }
+      }
+    }
     return await this.studentChallengeModel
-      .find({
-        reviewer: teacherId,
-      })
+      .find(findQuery)
       .populate('challenge', { description: 1 })
       .populate('student', { name: 1 });
   }
 
-  async getStudentChallenge(studentId: any): Promise<StudentChallenge[]> {
+  async getStudentChallenge(
+    studentId: any,
+    status?: ChallengeStatus,
+  ): Promise<StudentChallenge[]> {
+    const findQuery = {};
+    findQuery['student'] = studentId;
+
+    if (status) {
+      if (status != ChallengeStatus.All) {
+        if (status == ChallengeStatus.Completed) {
+          findQuery['isDone'] = true;
+          findQuery['isReviewed'] = false;
+        } else if (status == ChallengeStatus.UnComplete) {
+          findQuery['isDone'] = false;
+        } else if (status == ChallengeStatus.Reviewed) {
+          findQuery['isReviewed'] = true;
+        }
+      }
+    }
     return await this.studentChallengeModel
-      .find(
-        {
-          student: studentId,
-        },
-        {
-          isDone: 1,
-          solution: 1,
-          isReview: 1,
-          grade: 1,
-          comment: 1,
-        },
-      )
+      .find(findQuery, {
+        isDone: 1,
+        solution: 1,
+        isReview: 1,
+        grade: 1,
+        comment: 1,
+      })
       .populate('challenge', { description: 1 });
   }
 
