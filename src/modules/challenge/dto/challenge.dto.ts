@@ -23,10 +23,10 @@ export class AssignChallenge {
   studentId: string;
 }
 
-export class CompletedChallenge {
+export class SolveChallenge {
   @ApiProperty()
   @IsNotEmpty()
-  challengeId: string;
+  studentchallengeId: string;
 
   @ApiProperty()
   @IsNotEmpty()

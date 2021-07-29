@@ -1,6 +1,6 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   Challenge,
   ChallengeDocument,
@@ -10,7 +10,7 @@ import {
   StudentChallengeDocument,
 } from 'src/models/schemas/studentChallenge.schema';
 import { User, UserDocument } from 'src/models/schemas/user.schema';
-import { CreateChallenge } from './dto/challenge.dto';
+import { CreateChallenge, SolveChallenge } from './dto/challenge.dto';
 
 @Injectable()
 export default class ChallengeService {
@@ -123,8 +123,8 @@ export default class ChallengeService {
     }
 
     const studentChallenge = await this.studentChallengeModel.create({
-      challenge: challengeId,
-      student: studentId,
+      challenge: Types.ObjectId(challengeId),
+      student: Types.ObjectId(studentId),
       reviewer: teacher._id,
       solution: '',
     });
@@ -168,13 +168,76 @@ export default class ChallengeService {
     return studentChallenge;
   }
 
-  async getReviewChallenge(teacherId): Promise<StudentChallenge[]> {
+  async getReviewChallenge(teacherId: any): Promise<StudentChallenge[]> {
     return await this.studentChallengeModel
       .find({
         reviewer: teacherId,
       })
       .populate('challenge', { description: 1 })
       .populate('student', { name: 1 });
+  }
+
+  async getStudentChallenge(studentId: any): Promise<StudentChallenge[]> {
+    return await this.studentChallengeModel
+      .find(
+        {
+          student: studentId,
+        },
+        {
+          isDone: 1,
+          solution: 1,
+          isReview: 1,
+          grade: 1,
+          comment: 1,
+        },
+      )
+      .populate('challenge', { description: 1 });
+  }
+
+  async solveChallenge(
+    studentId: any,
+    data: SolveChallenge,
+  ): Promise<StudentChallenge> {
+    // Validate challenge
+    const isChallengeReadyToSolve = await this.studentChallengeModel.findOne({
+      _id: data.studentchallengeId,
+      student: studentId,
+    });
+
+    if (!isChallengeReadyToSolve) {
+      throw new HttpException(
+        {
+          message: 'Challenge not found',
+        },
+        404,
+      );
+    } else if (isChallengeReadyToSolve.isDone == true) {
+      throw new HttpException(
+        {
+          message: 'Challenge already solved',
+        },
+        400,
+      );
+    }
+
+    const solvedChallenge = await this.studentChallengeModel
+      .findOneAndUpdate(
+        {
+          _id: data.studentchallengeId,
+        },
+        {
+          solution: data.solutions,
+          isDone: true,
+        },
+        {
+          fields: {
+            solution: 1,
+          },
+        },
+      )
+      .populate('challenge', { description: 1 });
+
+    return solvedChallenge;
   }
 
   private async findOneOrFail(id: string): Promise<Challenge> {

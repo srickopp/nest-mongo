@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
   Param,
   Post,
   Put,
@@ -12,11 +13,16 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { Role } from 'src/enum/role.enum';
 import { BearerHttpGuard } from 'src/guard/http.guard';
 import { TeacherGuard } from 'src/guard/teacher.guard';
 import { User } from 'src/models/schemas/user.schema';
 import ChallengeService from './challenge.service';
-import { AssignChallenge, CreateChallenge } from './dto/challenge.dto';
+import {
+  AssignChallenge,
+  CreateChallenge,
+  SolveChallenge,
+} from './dto/challenge.dto';
 
 @Controller('challenge')
 export default class ChallengeController {
@@ -96,8 +102,57 @@ export default class ChallengeController {
     );
 
     return res.status(201).send({
-      message: 'Success assign challenge',
+      message: 'Success get challenge',
       data: reviewChallenges,
+    });
+  }
+
+  @ApiTags('Challenge-Student')
+  @ApiBearerAuth()
+  @UseGuards(BearerHttpGuard)
+  @Get('/student-challenge')
+  async getStudentChallenge(@Res() res: Response) {
+    const userInfo: User = res.locals.session.user;
+    if (userInfo.role != Role.Student) {
+      throw new HttpException(
+        {
+          message: 'Only student can access this information',
+        },
+        403,
+      );
+    }
+    const studentChallenges = await this.challengeService.getStudentChallenge(
+      userInfo._id,
+    );
+
+    return res.status(201).send({
+      message: 'Success get challenge',
+      data: studentChallenges,
+    });
+  }
+
+  @ApiTags('Challenge-Student')
+  @ApiBearerAuth()
+  @UseGuards(BearerHttpGuard)
+  @Post('/student-challenge')
+  async solveChallenge(@Body() body: SolveChallenge, @Res() res: Response) {
+    const userInfo: User = res.locals.session.user;
+    if (userInfo.role != Role.Student) {
+      throw new HttpException(
+        {
+          message: 'Only student can access this information',
+        },
+        403,
+      );
+    }
+    const studentChallenge = await this.challengeService.solveChallenge(
+      userInfo._id,
+      body,
+    );
+
+    return res.status(201).send({
+      message: 'Success solve challenge',
+      data: studentChallenge,
     });
   }
 
