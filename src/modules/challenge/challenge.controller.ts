@@ -30,6 +30,34 @@ import {
 export default class ChallengeController {
   constructor(private readonly challengeService: ChallengeService) {}
 
+  /**
+   * This function will handle to return a list of challenge
+   * only teacher can see and do this actions
+   * @param filter
+   * @param res
+   */
+  @ApiTags('Challenge-Teacher')
+  @ApiQuery({
+    name: 'filter',
+    required: false,
+  })
+  @ApiBearerAuth()
+  @UseGuards(TeacherGuard)
+  @Get('/')
+  async getChallenges(@Query('filter') filter: string, @Res() res: Response) {
+    const getChallenges = await this.challengeService.getChallenges(filter);
+    return res.status(200).send({
+      message: 'List of challenge',
+      data: getChallenges,
+    });
+  }
+
+  /**
+   * This one is endpoint to create a challenge that create by teacher
+   * and then teacher can assigne a challenge to the students
+   * @param body
+   * @param res
+   */
   @ApiTags('Challenge-Teacher')
   @ApiBearerAuth()
   @UseGuards(TeacherGuard)
@@ -42,6 +70,13 @@ export default class ChallengeController {
     });
   }
 
+  /**
+   * This endpoint is used to update the description for a challenge
+   * only teacher can do this actions
+   * @param id
+   * @param body
+   * @param res
+   */
   @ApiTags('Challenge-Teacher')
   @ApiBearerAuth()
   @UseGuards(TeacherGuard)
@@ -62,6 +97,12 @@ export default class ChallengeController {
     });
   }
 
+  /**
+   * This endpoint will handle about deleting a challenge
+   * only teacher can do this actions
+   * @param id
+   * @param res
+   */
   @ApiTags('Challenge-Teacher')
   @ApiBearerAuth()
   @UseGuards(TeacherGuard)
@@ -75,6 +116,13 @@ export default class ChallengeController {
     });
   }
 
+  /**
+   * Teacher can assign the student to a challenge through this endpoint
+   * first thing first, teacher should create a challenge if there's no
+   * existing challenge
+   * @param body
+   * @param res
+   */
   @ApiTags('Challenge-Teacher')
   @ApiBearerAuth()
   @UseGuards(TeacherGuard)
@@ -93,6 +141,16 @@ export default class ChallengeController {
     });
   }
 
+  /**
+   * With this endpoint teacher can see a list of student challenge,
+   * that they assign to the student.
+   * Also can filter the student challenge by status,
+   * unComplete: Student not do the assignment yet.
+   * complete: Student already done with the assignment & ready to review
+   * reviewed: Student challenge with review
+   * @param status
+   * @param res
+   */
   @ApiTags('Challenge-Teacher')
   @ApiBearerAuth()
   @ApiQuery({
@@ -118,6 +176,11 @@ export default class ChallengeController {
     });
   }
 
+  /**
+   * Teacher can give a review to student assigmnet with this endpoint.
+   * @param body
+   * @param res
+   */
   @ApiTags('Challenge-Teacher')
   @ApiBearerAuth()
   @UseGuards(TeacherGuard)
@@ -135,6 +198,16 @@ export default class ChallengeController {
     });
   }
 
+  /**
+   * With this endpoint student can see a list of student challenge,
+   * that assigned to them
+   * Also can filter the student challenge by status,
+   * unComplete: Student not do the assignment yet.
+   * complete: Student already done with the assignment & ready to review
+   * reviewed: Student challenge with review
+   * @param status
+   * @param res
+   */
   @ApiTags('Challenge-Student')
   @ApiBearerAuth()
   @ApiQuery({
@@ -168,6 +241,12 @@ export default class ChallengeController {
     });
   }
 
+  /**
+   * With this endpoint student can send their solution
+   * to solve the challenge
+   * @param body
+   * @param res
+   */
   @ApiTags('Challenge-Student')
   @ApiBearerAuth()
   @UseGuards(BearerHttpGuard)
@@ -193,22 +272,11 @@ export default class ChallengeController {
     });
   }
 
-  @ApiTags('Challenge')
-  @ApiQuery({
-    name: 'filter',
-    required: false,
-  })
-  @ApiBearerAuth()
-  @UseGuards(BearerHttpGuard)
-  @Get('/')
-  async getChallenges(@Query('filter') filter: string, @Res() res: Response) {
-    const getChallenges = await this.challengeService.getChallenges(filter);
-    return res.status(200).send({
-      message: 'List of challenge',
-      data: getChallenges,
-    });
-  }
-
+  /**
+   * This endpoint will handle and return the detail of challenge
+   * @param id
+   * @param res
+   */
   @ApiTags('Challenge')
   @ApiBearerAuth()
   @UseGuards(BearerHttpGuard)
